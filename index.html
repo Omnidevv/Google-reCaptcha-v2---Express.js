@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    </head>
+    <body>
+        <form id="commentform">
+            <input type="text" placeholder="What do you want to say?">
+            <br>
+            <div class="g-recaptcha" data-sitekey="6LcTXOQUAAAAANNn-0Ml94unV2BhWKHCEVD79VjR"></div>
+            <br>
+            <input type="submit" value="Submit"/>
+        </form>
+        <br>
+        <div id="comments">
+            <h2>Comments</h2>
+            <br>
+        </div>
+        <br>
+        <script>
+            //Loads the comments
+            window.onload = function(){
+                fetch("/comments", {method: "GET"})
+                .then(res => res.json())
+                .then(comments => {
+                    comments.length > 0 ? comments.forEach((comment, i) => {
+                        document.getElementById("comments").innerHTML += "<p>"+(comments.length-i)+": "+comment+"</p>"
+                    }) : document.getElementById("comments").innerHTML += "<p>No comments...</p>"
+                })
+            }
+
+            //Posts the comment
+            document.getElementById("commentform").onsubmit = function(e){
+                e.preventDefault()
+
+                //Get the captcha response
+                var formData = new FormData(document.getElementById("commentform"))
+                var captchaResponse = formData.get("g-recaptcha-response")
+
+                fetch("/comments/" + encodeURI(document.querySelector("input[type=text]").value)+"/"+encodeURI(captchaResponse), {method: "POST"})
+                .then(()=>location.reload())
+            }
+        </script>
+    </body>
+</html>
